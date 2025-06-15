@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "nombre": "Arroz",
+    "stock": 10,
+    "desc": "Arroz de rapida coccion",
+    "tipo": "Alimento",
+    "precio": 20,
+    "status": true
+  },
+  {
+    "id": 2,
+    "nombre": "Pollo",
+    "stock": 2,
+    "desc": "Pollo de la granja feliz",
+    "tipo": "Alimento",
+    "precio": 120,
+    "status": true
+  }
+]
