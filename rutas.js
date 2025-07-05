@@ -3,36 +3,34 @@ const express = require('express');
 const router = express.Router();
 
 const servicioProducts = require('./servicios/servicioProducts');
-
 const servicioCarts = require('./servicios/servicioCarts');
 
 /////////////////////////////////
-//Section Produts
+// Sección Products
 /////////////////////////////////
-router.get('/products', servicioProducts.listarProducts);
+router.get('/products', servicioProducts.listProducts);
 
-router.get('/products/:id', servicioProducts.mostrarProduct);
+router.get('/products/:id', servicioProducts.showProduct);
 
-router.post('/products', servicioProducts.agregarProducto);
+router.post('/products', servicioProducts.addProducto);
 
-router.put('/products/:id', servicioProducts.actualizarProducto);
+router.put('/products/:id', servicioProducts.refreshProduct);
 
-router.delete('/products/:id', servicioProducts.eliminarProducto);
+router.delete('/products/:id', servicioProducts.deletedProduct);
 
-router.patch('/products/:id/:status', servicioProducts.cambiarEstadoProducto);
+router.patch('/products/:id/:status', servicioProducts.changeStatusProduct);
+
 /////////////////////////////////
-
+// Sección Carts
 /////////////////////////////////
-//Section Cart
-/////////////////////////////////
+router.post('/carts', servicioCarts.createCart);
 
-router.post('/carts', servicioCarts.crearCarrito);
+router.post('/carts/:cid/product/:pid', servicioCarts.addProductCart);
 
-router.post('/carts/:cid/product/:pid', servicioCarts.agregarProductoAlCarrito);
+router.get('/carts/:cid', servicioCarts.obtainCartById);
 
-router.get('/carts/:cid', servicioCarts.obtenerCarritoPorId);
+router.delete('/carts/:cid', servicioCarts.deletCart);
 
-router.delete('/carts/:cid', servicioCarts.eliminarCarrito);
 /////////////////////////////////
 
 module.exports = router;
