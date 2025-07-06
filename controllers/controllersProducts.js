@@ -44,9 +44,11 @@ function addProducto(req, res) {
     const data = fs.readFileSync(path, 'utf-8');
     const products = JSON.parse(data);
 
-    const newId = products.length > 0
-      ? Math.max(...products.map(p => typeof p.id === 'number' ? p.id : parseInt(p.id))) + 1
-      : 1;
+    const ids = products
+      .map(p => Number(p.id))
+      .filter(id => !isNaN(id));
+
+    const newId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
 
     const newProduct = {
       id: newId,

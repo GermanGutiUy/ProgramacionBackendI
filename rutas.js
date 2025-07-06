@@ -5,8 +5,8 @@ const router = express.Router();
 // Path a datos de productos para vistas
 const pathProducts = './datos/products.json';
 
-const servicioProducts = require('./servicios/servicioProducts');
-const servicioCarts = require('./servicios/servicioCarts');
+const controllersProducts = require('./controllers/controllersProducts');
+const controllersCarts = require('./controllers/controllersCarts');
 
 /////////////////////////////////
 // Sección Views
@@ -24,28 +24,28 @@ router.get('/realtimeproducts', (req, res) => {
 /////////////////////////////////
 // Sección Products
 /////////////////////////////////
-router.get('/products', servicioProducts.listProducts);
+router.get('/products', controllersProducts.listProducts);
 
-router.get('/products/:id', servicioProducts.showProduct);
+router.get('/products/:id', controllersProducts.showProduct);
 
-router.post('/products', servicioProducts.addProducto);
+router.post('/products', controllersProducts.addProducto);
 
-router.put('/products/:id', servicioProducts.refreshProduct);
+router.put('/products/:id', controllersProducts.refreshProduct);
 
-router.delete('/products/:id', servicioProducts.deletedProduct);
+router.delete('/products/:id', controllersProducts.deletedProduct);
 
-router.patch('/products/:id/:status', servicioProducts.changeStatusProduct);
+router.patch('/products/:id/:status', controllersProducts.changeStatusProduct);
 
 /////////////////////////////////
 // Sección Carts
 /////////////////////////////////
-router.post('/carts', servicioCarts.createCart);
+router.post('/carts', controllersCarts.createCart);
 
-router.post('/carts/:cid/product/:pid', servicioCarts.addProductCart);
+router.post('/carts/:cid/product/:pid', controllersCarts.addProductCart);
 
-router.get('/carts/:cid', servicioCarts.obtainCartById);
+router.get('/carts/:cid', controllersCarts.obtainCartById);
 
-router.delete('/carts/:cid', servicioCarts.deletCart);
+router.delete('/carts/:cid', controllersCarts.deletCart);
 
 /////////////////////////////////
 
