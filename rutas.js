@@ -1,9 +1,25 @@
 const express = require('express');
-
+const fs = require('fs');
 const router = express.Router();
+
+// Path a datos de productos para vistas
+const pathProducts = './datos/products.json';
 
 const servicioProducts = require('./servicios/servicioProducts');
 const servicioCarts = require('./servicios/servicioCarts');
+
+/////////////////////////////////
+// Sección Views
+/////////////////////////////////
+router.get('/', (req, res) => {
+  const data = fs.readFileSync(pathProducts, 'utf-8');
+  const products = JSON.parse(data);
+  res.render('home', { products });
+});
+
+router.get('/realtimeproducts', (req, res) => {
+  res.render('realTimeProducts');
+});
 
 /////////////////////////////////
 // Sección Products
