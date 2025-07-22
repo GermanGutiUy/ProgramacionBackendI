@@ -18,7 +18,25 @@ router.get('/', (req, res) => {
 });
 
 router.get('/realtimeproducts', (req, res) => {
-  res.render('realTimeProducts');
+  try {
+    const data = fs.readFileSync(pathProducts, 'utf-8');
+    const products = JSON.parse(data);
+    res.render('realTimeProducts', { products });  // <--- Aquí pasamos los productos a la vista
+  } catch (err) {
+    console.error('Error leyendo products.json:', err);
+    res.render('realTimeProducts', { products: [] });
+  }
+});
+
+router.get('/api/products', (req, res) => {
+  try {
+    const data = fs.readFileSync(pathProducts, 'utf-8');
+    const products = JSON.parse(data);
+    res.json(products);
+  } catch (err) {
+    console.error('Error leyendo products.json:', err);
+    res.json([]);
+  }
 });
 
 /////////////////////////////////

@@ -4,7 +4,7 @@
     "name": "Arroz",
     "stock": 10,
     "desc": "Arroz de rapida coccion",
-    "tipe": "Alimento",
+    "type": "Alimento",
     "price": 20,
     "status": true
   },
@@ -13,7 +13,7 @@
     "name": "Pollo",
     "stock": 2,
     "desc": "Pollo de la granja feliz",
-    "tipe": "Alimento",
+    "type": "Alimento",
     "price": 120,
     "status": true
   }

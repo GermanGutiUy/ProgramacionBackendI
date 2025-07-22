@@ -34,9 +34,9 @@ function showProduct(req, res) {
 // Agregar producto (POST)
 ///////////////////////////////////////
 function addProducto(req, res) {
-  const { name, stock, desc, tipe, price, status } = req.body;
+  const { name, stock, desc, type, price, status } = req.body;
 
-  if (!name || stock == null || !desc || !tipe || price == null) {
+  if (!name || stock == null || !desc || !type || price == null) {
     return res.status(400).json({ msj: 'Faltan campos obligatorios' });
   }
 
@@ -55,7 +55,7 @@ function addProducto(req, res) {
       name,
       stock,
       desc,
-      tipe,
+      type,
       price,
       status: status !== undefined ? status : true
     };
@@ -170,6 +170,65 @@ function changeStatusProduct(req, res) {
   }
 }
 
+// Función para agregar producto desde WebSocket
+function addProductFromSocket(productData) {
+  const data = fs.readFileSync(path, 'utf-8');
+  const products = JSON.parse(data);
+
+  const newId = products.length > 0
+    ? Math.max(...products.map(p => typeof p.id === 'number' ? p.id : parseInt(p.id))) + 1
+    : 1;
+
+  const newProduct = {
+    id: newId,
+    name: productData.name,
+    price: productData.price,
+    stock: productData.stock,
+    desc: productData.desc || '',
+    type: productData.type || '',
+    status: productData.status !== undefined ? productData.status : true
+  };
+
+  products.push(newProduct);
+  fs.writeFileSync(path, JSON.stringify(products, null, 2));
+  return newProduct;
+}
+
+// Función para actualizar producto desde WebSocket
+function updateProductFromSocket(updatedProduct) {
+  const data = fs.readFileSync(path, 'utf-8');
+  const products = JSON.parse(data);
+
+  const index = products.findIndex(p => p.id === updatedProduct.id);
+  if (index === -1) {
+    throw new Error(`Producto con ID ${updatedProduct.id} no encontrado`);
+  }
+
+  products[index] = {
+    ...products[index],
+    ...updatedProduct
+  };
+
+  fs.writeFileSync(path, JSON.stringify(products, null, 2));
+  return products[index];
+}
+
+// Función para eliminar producto desde WebSocket
+function deleteProductFromSocket(productId) {
+  const data = fs.readFileSync(path, 'utf-8');
+  const products = JSON.parse(data);
+
+  const index = products.findIndex(p => p.id === productId);
+  if (index === -1) {
+    throw new Error(`Producto con ID ${productId} no encontrado`);
+  }
+
+  const deleted = products.splice(index, 1)[0];
+  fs.writeFileSync(path, JSON.stringify(products, null, 2));
+  return deleted;
+}
+
+
 ///////////////////////////////////////
 // Export funciones
 ///////////////////////////////////////
@@ -179,6 +238,9 @@ module.exports = {
   addProducto,
   refreshProduct,
   deletedProduct,
-  changeStatusProduct
-  //Aca agrego mas funciones
+  changeStatusProduct,
+  addProductFromSocket,
+  updateProductFromSocket,
+  deleteProductFromSocket
 };
+

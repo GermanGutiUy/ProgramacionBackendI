@@ -1,7 +1,21 @@
-<h1>Lista de Productos</h1>
+<h1>Productos en Tiempo Real</h1>
 
-<ul>
-  {{#each products}}
-    <li><strong>{{this.name}}</strong> - Precio: ${{this.price}} - Stock: {{this.stock}}</li>
-  {{/each}}
-</ul>
+<ul id="product-list"></ul>
+
+<h2>Agregar Producto</h2>
+<form id="add-form" style="width: 300px; padding: 20px; border: 1px solid #ccc; font-family: Arial, sans-serif;">
+  <input name="name" placeholder="Nombre" required style="width: 100%; margin-bottom: 10px;" />
+  <input name="price" type="number" placeholder="Precio" step="0.01" required style="width: 100%; margin-bottom: 10px;" />
+  <input name="stock" type="number" placeholder="Stock" required style="width: 100%; margin-bottom: 10px;" />
+  <input name="desc" placeholder="Descripción" style="width: 100%; margin-bottom: 10px;" />
+  <input name="type" placeholder="Tipo" style="width: 100%; margin-bottom: 10px;" />
+  <label style="display: block; margin-bottom: 10px;">
+    Disponible: <input type="checkbox" name="status" checked />
+  </label>
+  <button type="submit" style="width: 100%; padding: 8px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+    Agregar Producto
+  </button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realtime.js"></script>
