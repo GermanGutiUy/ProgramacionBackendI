@@ -24,43 +24,30 @@ router.get('/realtimeproducts', (req, res) => {
 /////////////////////////////////
 // Sección API
 /////////////////////////////////
-router.get('/api/products', controllersProducts.listProducts); // ← API JSON con paginación
+router.get('/api/products', controllersProducts.listProducts);
 
 /////////////////////////////////
 // Sección Products
 /////////////////////////////////
 router.get('/products', controllersProducts.listProducts);
-
 router.get('/products/:id', controllersProducts.showProduct);
-
 router.post('/products', controllersProducts.addProducto);
-
 router.put('/products/:id', controllersProducts.refreshProduct);
-
 router.delete('/products/:id', controllersProducts.deletedProduct);
-
 router.patch('/products/:id/:status', controllersProducts.changeStatusProduct);
 
 /////////////////////////////////
 // Sección Carts
 /////////////////////////////////
 router.post('/carts', controllersCarts.createCart);
-
 router.post('/carts/:cid/product/:pid', controllersCarts.addProductCart);
-
 router.get('/carts/:cid', controllersCarts.obtainCartById);
-
 router.delete('/carts/:cid', controllersCarts.deletCart);
 
 // Nuevas rutas para carritos (paso 3)
 router.delete('/api/carts/:cid/products/:pid', controllersCarts.deleteProductFromCart);
-
 router.put('/api/carts/:cid/products/:pid', controllersCarts.updateProductQuantity);
-
 router.put('/api/carts/:cid', controllersCarts.updateCartProducts);
-
 router.delete('/api/carts/:cid', controllersCarts.clearCart);
-
-/////////////////////////////////
 
 module.exports = router;

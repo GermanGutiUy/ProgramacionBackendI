@@ -11,12 +11,13 @@ const router = require('./rutas');
 //////////////////////////////
 //Conexión a MongoDB
 //////////////////////////////
-mongoose.connect('mongodb://localhost:27017/mongodb+srv://germangutierrezrial6:<2rgxoa2ztGxvZbrW>@cluster0.ifalnwv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect('mongodb+srv://germangutierrezrial6:2rgxoa2ztGxvZbrW@cluster0.ifalnwv.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
 .then(() => console.log('🟢 MongoDB conectado'))
 .catch(err => console.error('❌ Error conexión MongoDB:', err));
+
 
 const app = express();
 const httpServer = createServer(app);

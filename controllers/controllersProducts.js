@@ -1,4 +1,5 @@
-const Product = require('../datos/products');
+// controllers/controllersProducts.js
+const Product = require('../models/product'); // <-- cambiar aquí la importación
 
 ///////////////////////////////////////
 // Listar productos con paginación, filtros y orden
@@ -11,11 +12,11 @@ async function listProducts(req, res) {
 
     const filter = {};
     if (query) {
-      // Buscar por categoría (type) o por disponibilidad (status)
+      // Buscar por categoría (category) o por disponibilidad (status)
       if (query.toLowerCase() === 'true' || query.toLowerCase() === 'false') {
         filter.status = query.toLowerCase() === 'true';
       } else {
-        filter.type = query;
+        filter.category = query; // asegurate que el campo correcto es 'category' según tu modelo
       }
     }
 
@@ -85,19 +86,23 @@ async function showProduct(req, res) {
 ///////////////////////////////////////
 async function addProducto(req, res) {
   try {
-    const { name, stock, desc, type, price, status } = req.body;
-    if (!name || stock == null || !desc || !type || price == null) {
+    const { title, stock, description, category, price, status } = req.body;
+
+    if (!title || stock == null || !description || !category || price == null) {
       return res.status(400).json({ msj: 'Faltan campos obligatorios' });
     }
+
     const newProduct = new Product({
-      name,
+      title,
       stock,
-      desc,
-      type,
+      description,
+      category,
       price,
       status: status !== undefined ? status : true
     });
+
     await newProduct.save();
+
     res.status(201).json({ msj: 'Producto agregado', product: newProduct });
   } catch (err) {
     console.error(err);
