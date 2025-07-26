@@ -4,8 +4,19 @@ const { Server } = require('socket.io');
 const exphbs = require('express-handlebars');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 const router = require('./rutas');
+
+//////////////////////////////
+//Conexión a MongoDB
+//////////////////////////////
+mongoose.connect('mongodb://localhost:27017/mongodb+srv://germangutierrezrial6:<2rgxoa2ztGxvZbrW>@cluster0.ifalnwv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('🟢 MongoDB conectado'))
+.catch(err => console.error('❌ Error conexión MongoDB:', err));
 
 const app = express();
 const httpServer = createServer(app);
@@ -76,7 +87,6 @@ io.on('connection', socket => {
     }
   });
 });
-
 
 // Servidor
 const PORT = 8080;

@@ -1,69 +1,103 @@
-const fs = require('fs');
-
-const path = "./datos/products.json";
+const Product = require('../datos/products');
 
 ///////////////////////////////////////
-// Listar todos los productos
+// Listar productos con paginación, filtros y orden
 ///////////////////////////////////////
-function listProducts(req, res) {
-  const products = fs.readFileSync(path, 'utf-8');
-  const productsJson = JSON.parse(products);
-  console.log(productsJson);
-  res.json(productsJson);
-}
-
-///////////////////////////////////////
-// Listar producto por ID
-///////////////////////////////////////
-function showProduct(req, res) {
-  const productId = parseInt(req.params.id);
-  console.log(productId);
-  const products = fs.readFileSync(path, 'utf-8');
-  const productJson = JSON.parse(products);
-  const product = productJson.filter(item =>
-    item.id === productId
-  );
-  if (!product || product.length === 0) {
-    return res.status(404).json({ msj: 'Producto no encontrado' });
-  }
-  console.log(product);
-  res.json(product);
-}
-
-///////////////////////////////////////
-// Agregar producto (POST)
-///////////////////////////////////////
-function addProducto(req, res) {
-  const { name, stock, desc, type, price, status } = req.body;
-
-  if (!name || stock == null || !desc || !type || price == null) {
-    return res.status(400).json({ msj: 'Faltan campos obligatorios' });
-  }
-
+async function listProducts(req, res) {
   try {
-    const data = fs.readFileSync(path, 'utf-8');
-    const products = JSON.parse(data);
+    let { limit = 10, page = 1, sort, query } = req.query;
+    limit = parseInt(limit);
+    page = parseInt(page);
 
-    const ids = products
-      .map(p => Number(p.id))
-      .filter(id => !isNaN(id));
+    const filter = {};
+    if (query) {
+      // Buscar por categoría (type) o por disponibilidad (status)
+      if (query.toLowerCase() === 'true' || query.toLowerCase() === 'false') {
+        filter.status = query.toLowerCase() === 'true';
+      } else {
+        filter.type = query;
+      }
+    }
 
-    const newId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    const sortOption = {};
+    if (sort === 'asc') sortOption.price = 1;
+    else if (sort === 'desc') sortOption.price = -1;
 
-    const newProduct = {
-      id: newId,
+    const totalDocs = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalDocs / limit);
+
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const hasPrevPage = page > 1;
+    const hasNextPage = page < totalPages;
+
+    const baseUrl = req.baseUrl + req.path;
+
+    // Construir links con query params para paginación
+    const queryString = [];
+    if (limit) queryString.push(`limit=${limit}`);
+    if (sort) queryString.push(`sort=${sort}`);
+    if (query) queryString.push(`query=${query}`);
+
+    const baseLink = `${baseUrl}?${queryString.join('&')}`;
+
+    const prevLink = hasPrevPage ? `${baseLink}&page=${page - 1}` : null;
+    const nextLink = hasNextPage ? `${baseLink}&page=${page + 1}` : null;
+
+    res.json({
+      status: 'success',
+      payload: products,
+      totalPages,
+      prevPage: hasPrevPage ? page - 1 : null,
+      nextPage: hasNextPage ? page + 1 : null,
+      page,
+      hasPrevPage,
+      hasNextPage,
+      prevLink,
+      nextLink
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Error listando productos' });
+  }
+}
+
+///////////////////////////////////////
+// Obtener producto por ID
+///////////////////////////////////////
+async function showProduct(req, res) {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ msj: 'Producto no encontrado' });
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msj: 'Error obteniendo producto' });
+  }
+}
+
+///////////////////////////////////////
+// Crear nuevo producto
+///////////////////////////////////////
+async function addProducto(req, res) {
+  try {
+    const { name, stock, desc, type, price, status } = req.body;
+    if (!name || stock == null || !desc || !type || price == null) {
+      return res.status(400).json({ msj: 'Faltan campos obligatorios' });
+    }
+    const newProduct = new Product({
       name,
       stock,
       desc,
       type,
       price,
       status: status !== undefined ? status : true
-    };
-
-    products.push(newProduct);
-
-    fs.writeFileSync(path, JSON.stringify(products, null, 2));
-
+    });
+    await newProduct.save();
     res.status(201).json({ msj: 'Producto agregado', product: newProduct });
   } catch (err) {
     console.error(err);
@@ -72,34 +106,20 @@ function addProducto(req, res) {
 }
 
 ///////////////////////////////////////
-// Actualizar producto (PUT)
+// Actualizar producto
 ///////////////////////////////////////
-function refreshProduct(req, res) {
-  const productId = parseInt(req.params.id);
-  const campRefresh = req.body;
-
+async function refreshProduct(req, res) {
   try {
-    const data = fs.readFileSync(path, 'utf-8');
-    const products = JSON.parse(data);
+    const productId = req.params.id;
+    const updateData = req.body;
 
-    const index = products.findIndex(p => p.id === productId);
+    if ('id' in updateData) delete updateData.id;
 
-    if (index === -1) {
-      return res.status(404).json({ msj: `Producto con ID ${productId} no encontrado` });
-    }
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
 
-    if ('id' in campRefresh) {
-      delete campRefresh.id;
-    }
+    if (!updatedProduct) return res.status(404).json({ msj: 'Producto no encontrado' });
 
-    products[index] = {
-      ...products[index],
-      ...campRefresh
-    };
-
-    fs.writeFileSync(path, JSON.stringify(products, null, 2));
-
-    res.json({ msj: 'Producto actualizado con éxito', product: products[index] });
+    res.json({ msj: 'Producto actualizado con éxito', product: updatedProduct });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msj: 'Error al actualizar el producto' });
@@ -107,26 +127,14 @@ function refreshProduct(req, res) {
 }
 
 ///////////////////////////////////////
-// Eliminar producto (DELETE)
+// Eliminar producto
 ///////////////////////////////////////
-function deletedProduct(req, res) {
-  const productId = parseInt(req.params.id);
-
+async function deletedProduct(req, res) {
   try {
-    const data = fs.readFileSync(path, 'utf-8');
-    const products = JSON.parse(data);
-
-    const index = products.findIndex(p => p.id === productId);
-
-    if (index === -1) {
-      return res.status(404).json({ msj: `Producto con ID ${productId} no encontrado` });
-    }
-
-    const productDeleted = products.splice(index, 1)[0];
-
-    fs.writeFileSync(path, JSON.stringify(products, null, 2));
-
-    res.json({ msj: 'Producto eliminado con éxito', product: productDeleted });
+    const productId = req.params.id;
+    const deleted = await Product.findByIdAndDelete(productId);
+    if (!deleted) return res.status(404).json({ msj: 'Producto no encontrado' });
+    res.json({ msj: 'Producto eliminado con éxito', product: deleted });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msj: 'Error al eliminar el producto' });
@@ -134,103 +142,32 @@ function deletedProduct(req, res) {
 }
 
 ///////////////////////////////////////
-// Cambiar status del producto
+// Cambiar status producto (true/false)
 ///////////////////////////////////////
-function changeStatusProduct(req, res) {
-  const productId = parseInt(req.params.id);
-  const statusParam = req.params.status;
-  let status;
-
-  if (statusParam === 'true') {
-    status = true;
-  } else if (statusParam === 'false') {
-    status = false;
-  } else {
-    return res.status(400).json({ msj: 'Debes enviar un valor booleano en "status"' });
-  }
-
+async function changeStatusProduct(req, res) {
   try {
-    const data = fs.readFileSync(path, 'utf-8');
-    const products = JSON.parse(data);
+    const productId = req.params.id;
+    const statusParam = req.params.status;
 
-    const index = products.findIndex(p => p.id === productId);
-
-    if (index === -1) {
-      return res.status(404).json({ msj: `Producto con ID ${productId} no encontrado` });
+    if (!['true', 'false'].includes(statusParam)) {
+      return res.status(400).json({ msj: 'Status debe ser true o false' });
     }
 
-    products[index].status = status;
+    const status = statusParam === 'true';
 
-    fs.writeFileSync(path, JSON.stringify(products, null, 2));
+    const updatedProduct = await Product.findByIdAndUpdate(productId, { status }, { new: true });
 
-    res.json({ msj: `Status actualizado a ${status}`, product: products[index] });
+    if (!updatedProduct) return res.status(404).json({ msj: 'Producto no encontrado' });
+
+    res.json({ msj: `Status actualizado a ${status}`, product: updatedProduct });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msj: 'Error al cambiar el estado del producto' });
+    res.status(500).json({ msj: 'Error al cambiar el status' });
   }
 }
-
-// Función para agregar producto desde WebSocket
-function addProductFromSocket(productData) {
-  const data = fs.readFileSync(path, 'utf-8');
-  const products = JSON.parse(data);
-
-  const newId = products.length > 0
-    ? Math.max(...products.map(p => typeof p.id === 'number' ? p.id : parseInt(p.id))) + 1
-    : 1;
-
-  const newProduct = {
-    id: newId,
-    name: productData.name,
-    price: productData.price,
-    stock: productData.stock,
-    desc: productData.desc || '',
-    type: productData.type || '',
-    status: productData.status !== undefined ? productData.status : true
-  };
-
-  products.push(newProduct);
-  fs.writeFileSync(path, JSON.stringify(products, null, 2));
-  return newProduct;
-}
-
-// Función para actualizar producto desde WebSocket
-function updateProductFromSocket(updatedProduct) {
-  const data = fs.readFileSync(path, 'utf-8');
-  const products = JSON.parse(data);
-
-  const index = products.findIndex(p => p.id === updatedProduct.id);
-  if (index === -1) {
-    throw new Error(`Producto con ID ${updatedProduct.id} no encontrado`);
-  }
-
-  products[index] = {
-    ...products[index],
-    ...updatedProduct
-  };
-
-  fs.writeFileSync(path, JSON.stringify(products, null, 2));
-  return products[index];
-}
-
-// Función para eliminar producto desde WebSocket
-function deleteProductFromSocket(productId) {
-  const data = fs.readFileSync(path, 'utf-8');
-  const products = JSON.parse(data);
-
-  const index = products.findIndex(p => p.id === productId);
-  if (index === -1) {
-    throw new Error(`Producto con ID ${productId} no encontrado`);
-  }
-
-  const deleted = products.splice(index, 1)[0];
-  fs.writeFileSync(path, JSON.stringify(products, null, 2));
-  return deleted;
-}
-
 
 ///////////////////////////////////////
-// Export funciones
+// Exportar funciones
 ///////////////////////////////////////
 module.exports = {
   listProducts,
@@ -238,9 +175,5 @@ module.exports = {
   addProducto,
   refreshProduct,
   deletedProduct,
-  changeStatusProduct,
-  addProductFromSocket,
-  updateProductFromSocket,
-  deleteProductFromSocket
+  changeStatusProduct
 };
-

@@ -1,21 +1,38 @@
-<h1>Productos en Tiempo Real</h1>
+<h1>Productos</h1>
 
-<ul id="product-list"></ul>
+<table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; margin-bottom: 20px;">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Precio</th>
+      <th>Stock</th>
+      <th>Tipo</th>
+      <th>Disponible</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each payload}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>${{this.price}}</td>
+        <td>{{this.stock}}</td>
+        <td>{{this.type}}</td>
+        <td>{{#if this.status}}✅{{else}}❌{{/if}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
 
-<h2>Agregar Producto</h2>
-<form id="add-form" style="width: 300px; padding: 20px; border: 1px solid #ccc; font-family: Arial, sans-serif;">
-  <input name="name" placeholder="Nombre" required style="width: 100%; margin-bottom: 10px;" />
-  <input name="price" type="number" placeholder="Precio" step="0.01" required style="width: 100%; margin-bottom: 10px;" />
-  <input name="stock" type="number" placeholder="Stock" required style="width: 100%; margin-bottom: 10px;" />
-  <input name="desc" placeholder="Descripción" style="width: 100%; margin-bottom: 10px;" />
-  <input name="type" placeholder="Tipo" style="width: 100%; margin-bottom: 10px;" />
-  <label style="display: block; margin-bottom: 10px;">
-    Disponible: <input type="checkbox" name="status" checked />
-  </label>
-  <button type="submit" style="width: 100%; padding: 8px; background-color: #28a745; color: white; border: none; cursor: pointer;">
-    Agregar Producto
-  </button>
-</form>
+<div style="margin-bottom: 20px;">
+  Página {{page}} de {{totalPages}}
+</div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/realtime.js"></script>
+<div>
+  {{#if hasPrevPage}}
+    <a href="/?page={{prevPage}}&limit=5">⬅ Anterior</a>
+  {{/if}}
+
+  {{#if hasNextPage}}
+    <a href="/?page={{nextPage}}&limit=5" style="margin-left: 10px;">Siguiente ➡</a>
+  {{/if}}
+</div>
