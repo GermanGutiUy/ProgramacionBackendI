@@ -34,6 +34,29 @@ const handlebars = exphbs.create({
   helpers: {
     json: function(context) {
       return JSON.stringify(context);
+    },
+    eq: function(a, b) {
+      return a === b;
+    },
+    range: function(start, end) {
+      const result = [];
+      for (let i = start; i <= end; i++) {
+        result.push(i);
+      }
+      return result;
+    },
+    formatPrice: function(price) {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+      }).format(price);
+    },
+    formatDate: function(date) {
+      return new Date(date).toLocaleDateString('es-AR');
+    },
+    truncate: function(str, length) {
+      if (str.length <= length) return str;
+      return str.substring(0, length) + '...';
     }
   }
 });

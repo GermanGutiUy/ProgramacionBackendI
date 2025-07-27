@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Responsive Modal</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    
+    .form-control, .form-select {
+      pointer-events: auto !important;
+      user-select: text !important;
+      background-color: white !important;
+      color: #333 !important;
+    }
+    
+    .btn {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+    
+    /* Estilos responsive para modales */
+    @media (max-width: 768px) {
+      .modal-dialog {
+        margin: 10px !important;
+        max-width: calc(100% - 20px) !important;
+      }
+      
+      .modal-dialog.modal-lg {
+        max-width: calc(100% - 20px) !important;
+      }
+      
+      .modal-content {
+        border-radius: 10px !important;
+      }
+      
+      .modal-header {
+        border-radius: 10px 10px 0 0 !important;
+        padding: 15px !important;
+      }
+      
+      .modal-body {
+        padding: 15px !important;
+      }
+      
+      .modal-footer {
+        padding: 15px !important;
+      }
+      
+      /* Hacer que los campos se apilen en móviles */
+      .row .col-md-6 {
+        width: 100% !important;
+        margin-bottom: 15px !important;
+      }
+      
+      /* Ajustar tamaños de fuente */
+      .modal-title {
+        font-size: 1.1rem !important;
+      }
+      
+      .form-label {
+        font-size: 0.9rem !important;
+      }
+      
+      .form-control, .form-select {
+        font-size: 16px !important; /* Evita zoom en iOS */
+        padding: 12px !important;
+      }
+      
+      /* Botones más grandes para touch */
+      .btn {
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+        min-height: 44px !important; /* Tamaño mínimo para touch */
+      }
+    }
+
+    @media (max-width: 576px) {
+      .modal-dialog {
+        margin: 5px !important;
+        max-width: calc(100% - 10px) !important;
+      }
+      
+      .modal-dialog.modal-lg {
+        max-width: calc(100% - 10px) !important;
+      }
+      
+      .modal-header {
+        padding: 10px 15px !important;
+      }
+      
+      .modal-body {
+        padding: 10px 15px !important;
+      }
+      
+      .modal-footer {
+        padding: 10px 15px !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+      
+      .modal-footer .btn {
+        width: 100% !important;
+        margin: 0 !important;
+      }
+      
+      /* Asegurar que los inputs sean legibles */
+      input, textarea, select {
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+      }
+      
+      /* Ajustar el grid para móviles */
+      .row.g-3 > .col-12 {
+        margin-bottom: 15px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">
+      <i class="fas fa-mobile-alt text-primary me-2"></i>
+      Test de Modal Responsive
+    </h1>
+    
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center">
+        <p class="mb-4">Prueba el modal en diferentes tamaños de pantalla</p>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#responsiveModal">
+          <i class="fas fa-plus me-2"></i>
+          Abrir Modal Responsive
+        </button>
+      </div>
+    </div>
+    
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="alert alert-info">
+          <h5><i class="fas fa-info-circle me-2"></i>Instrucciones:</h5>
+          <ul class="mb-0">
+            <li>Haz clic en el botón para abrir el modal</li>
+            <li>Redimensiona la ventana del navegador</li>
+            <li>Prueba en modo móvil (F12 → Device Toolbar)</li>
+            <li>Verifica que los campos sean interactivos</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Responsive -->
+  <div class="modal fade" id="responsiveModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-plus text-primary me-2"></i>
+            Agregar Nuevo Producto
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Nombre del producto</label>
+                <input type="text" class="form-control" placeholder="Escribe el nombre del producto" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Precio</label>
+                <input type="number" class="form-control" placeholder="0.00" step="0.01" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Stock</label>
+                <input type="number" class="form-control" placeholder="0" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Categoría</label>
+                <select class="form-select" required>
+                  <option value="">Seleccionar categoría</option>
+                  <option value="electronics">Electrónicos</option>
+                  <option value="clothing">Ropa</option>
+                  <option value="books">Libros</option>
+                  <option value="home">Hogar</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" rows="3" placeholder="Describe el producto"></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Estado</label>
+                <select class="form-select">
+                  <option value="true">Disponible</option>
+                  <option value="false">No disponible</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Guardar Producto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🟢 Test responsive modal inicializado');
+      
+      // Verificar que Bootstrap esté disponible
+      if (typeof bootstrap !== 'undefined') {
+        console.log('✅ Bootstrap cargado correctamente');
+        
+        // Inicializar modal
+        const modal = new bootstrap.Modal(document.getElementById('responsiveModal'));
+        
+        // Asegurar que los inputs sean interactivos
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+          input.style.pointerEvents = 'auto';
+          input.style.userSelect = 'text';
+          input.style.webkitUserSelect = 'text';
+          input.style.mozUserSelect = 'text';
+          input.style.msUserSelect = 'text';
+        });
+        
+        // Mostrar información del viewport
+        function updateViewportInfo() {
+          const width = window.innerWidth;
+          const height = window.innerHeight;
+          console.log(`📱 Viewport: ${width}x${height}px`);
+          
+          if (width <= 576) {
+            console.log('📱 Dispositivo: Móvil pequeño');
+          } else if (width <= 768) {
+            console.log('📱 Dispositivo: Móvil grande/Tablet');
+          } else if (width <= 992) {
+            console.log('📱 Dispositivo: Tablet');
+          } else {
+            console.log('📱 Dispositivo: Desktop');
+          }
+        }
+        
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+        
+      } else {
+        console.error('❌ Bootstrap no está disponible');
+      }
+    });
+  </script>
+</body>
+</html> 

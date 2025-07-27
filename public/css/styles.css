@@ -1,0 +1,558 @@
+/* Estilos personalizados adicionales */
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Aplicar animaciones */
+.card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.navbar {
+  animation: slideIn 0.3s ease-out;
+}
+
+.btn:hover {
+  animation: pulse 0.3s ease-in-out;
+}
+
+/* Mejoras en el diseño */
+.main-container {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Efectos hover mejorados */
+.product-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+}
+
+/* Badges personalizados */
+.status-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s;
+}
+
+.status-badge:hover::before {
+  left: 100%;
+}
+
+/* Precios con efecto */
+.price-tag {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(45deg, var(--success-color), #2ecc71);
+}
+
+.price-tag::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: rotate(45deg);
+  transition: all 0.3s;
+}
+
+.price-tag:hover::after {
+  transform: rotate(45deg) translate(50%, 50%);
+}
+
+/* Tablas mejoradas */
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+  background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+  transform: scale(1.01);
+}
+
+/* Formularios mejorados - CORREGIDO */
+.form-control:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+  pointer-events: auto !important;
+}
+
+/* Asegurar que los formularios sean interactivos */
+.form-control, .form-select {
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.form-control:focus, .form-select:focus {
+  pointer-events: auto !important;
+  outline: none !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+  background-color: white !important;
+  color: #333 !important;
+}
+
+/* Botones con efectos - CORREGIDO */
+.btn {
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+  pointer-events: none;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Modales específicos */
+.modal {
+  z-index: 1050 !important;
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 15px 15px 0 0;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 15px 20px;
+}
+
+/* Responsive específico para modales */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 10px !important;
+    max-width: calc(100% - 20px) !important;
+  }
+  
+  .modal-dialog.modal-lg {
+    max-width: calc(100% - 20px) !important;
+  }
+  
+  .modal-content {
+    border-radius: 10px !important;
+  }
+  
+  .modal-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px !important;
+  }
+  
+  .modal-body {
+    padding: 15px !important;
+  }
+  
+  .modal-footer {
+    padding: 15px !important;
+  }
+  
+  /* Hacer que los campos se apilen en móviles */
+  .row .col-md-6 {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+  }
+  
+  /* Ajustar tamaños de fuente */
+  .modal-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .form-label {
+    font-size: 0.9rem !important;
+  }
+  
+  .form-control, .form-select {
+    font-size: 16px !important; /* Evita zoom en iOS */
+    padding: 12px !important;
+  }
+  
+  /* Botones más grandes para touch */
+  .btn {
+    padding: 12px 20px !important;
+    font-size: 1rem !important;
+    min-height: 44px !important; /* Tamaño mínimo para touch */
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 5px !important;
+    max-width: calc(100% - 10px) !important;
+  }
+  
+  .modal-dialog.modal-lg {
+    max-width: calc(100% - 10px) !important;
+  }
+  
+  .modal-header {
+    padding: 10px 15px !important;
+  }
+  
+  .modal-body {
+    padding: 10px 15px !important;
+  }
+  
+  .modal-footer {
+    padding: 10px 15px !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .modal-footer .btn {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Asegurar que los inputs sean legibles */
+  input, textarea, select {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Ajustar el grid para móviles */
+  .row.g-3 > .col-12 {
+    margin-bottom: 15px !important;
+  }
+}
+
+/* Asegurar que los modales no se desborden */
+.modal-dialog {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+.modal-content {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+/* Mejorar la experiencia táctil */
+.form-control:focus, .form-select:focus {
+  transform: none !important; /* Evitar transformaciones en móviles */
+}
+
+/* Asegurar que los inputs sean interactivos */
+input[type="text"], 
+input[type="number"], 
+input[type="email"], 
+textarea, 
+select {
+  background-color: white !important;
+  color: #333 !important;
+  border: 2px solid #e9ecef !important;
+  transition: all 0.3s ease !important;
+  pointer-events: auto !important;
+}
+
+input[type="text"]:focus, 
+input[type="number"]:focus, 
+input[type="email"]:focus, 
+textarea:focus, 
+select:focus {
+  background-color: white !important;
+  color: #333 !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+  pointer-events: auto !important;
+}
+
+/* FORZAR INTERACTIVIDAD - ESTILOS CRÍTICOS PARA MODALES */
+.modal input,
+.modal textarea,
+.modal select,
+.modal .form-control,
+.modal .form-select {
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  background-color: white !important;
+  color: #333 !important;
+  border: 2px solid #e9ecef !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+  cursor: text !important;
+  transition: all 0.3s ease !important;
+}
+
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus,
+.modal .form-control:focus,
+.modal .form-select:focus {
+  pointer-events: auto !important;
+  outline: none !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+  background-color: white !important;
+  color: #333 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 2 !important;
+  cursor: text !important;
+}
+
+/* Asegurar que los botones sean clickeables en modales */
+.modal .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Asegurar que los labels sean visibles en modales */
+.modal .form-label {
+  color: #333 !important;
+  font-weight: 500 !important;
+  margin-bottom: 8px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Asegurar que el modal esté por encima de todo */
+.modal.show {
+  display: block !important;
+  z-index: 1055 !important;
+}
+
+.modal-backdrop.show {
+  z-index: 1050 !important;
+}
+
+/* Asegurar que los inputs específicos en modales sean interactivos */
+.modal input[type="text"], 
+.modal input[type="number"], 
+.modal input[type="email"], 
+.modal textarea, 
+.modal select {
+  background-color: white !important;
+  color: #333 !important;
+  border: 2px solid #e9ecef !important;
+  transition: all 0.3s ease !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+  cursor: text !important;
+}
+
+.modal input[type="text"]:focus, 
+.modal input[type="number"]:focus, 
+.modal input[type="email"]:focus, 
+.modal textarea:focus, 
+.modal select:focus {
+  background-color: white !important;
+  color: #333 !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 2 !important;
+  cursor: text !important;
+}
+
+/* Loading spinner personalizado */
+.spinner-border {
+  border-width: 3px;
+}
+
+/* Notificaciones mejoradas */
+.alert {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Paginación mejorada */
+.pagination .page-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.pagination .page-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.3s;
+}
+
+.pagination .page-link:hover::before {
+  left: 100%;
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+  .main-container {
+    margin: 5px;
+    border-radius: 10px;
+  }
+  
+  .card {
+    margin-bottom: 15px;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .main-container {
+    background: rgba(33, 37, 41, 0.95);
+    color: #fff;
+  }
+  
+  .card {
+    background: rgba(52, 58, 64, 0.9);
+    color: #fff;
+  }
+  
+  .table {
+    color: #fff;
+  }
+  
+  .table tbody tr:hover {
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2980b9;
+}
+
+/* Efectos de texto */
+.text-gradient {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Iconos animados */
+.fas, .far, .fab {
+  transition: transform 0.3s ease;
+}
+
+.btn:hover .fas,
+.btn:hover .far,
+.btn:hover .fab {
+  transform: scale(1.2);
+}
+
+/* Efectos de carga */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+} 

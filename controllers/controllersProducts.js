@@ -1,67 +1,62 @@
 // controllers/controllersProducts.js
-const Product = require('../models/product'); // <-- cambiar aquí la importación
+const Product = require('../models/product');
 
 ///////////////////////////////////////
-// Listar productos con paginación, filtros y orden
+// Función para preparar datos para renderizado con Handlebars
+///////////////////////////////////////
+async function listProductsRender(req) {
+  let { limit = 10, page = 1, sort, query } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page);
+
+  const filter = {};
+  if (query) {
+    if (query.toLowerCase() === 'true' || query.toLowerCase() === 'false') {
+      filter.status = query.toLowerCase() === 'true';
+    } else {
+      filter.category = query;
+    }
+  }
+
+  const sortOption = {};
+  if (sort === 'asc') sortOption.price = 1;
+  else if (sort === 'desc') sortOption.price = -1;
+
+  const totalDocs = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalDocs / limit);
+
+  const products = await Product.find(filter)
+    .sort(sortOption)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();  // lean para que Handlebars pueda procesar
+
+  const hasPrevPage = page > 1;
+  const hasNextPage = page < totalPages;
+
+  return {
+    payload: products,
+    totalPages,
+    prevPage: hasPrevPage ? page - 1 : null,
+    nextPage: hasNextPage ? page + 1 : null,
+    page,
+    hasPrevPage,
+    hasNextPage
+  };
+}
+
+///////////////////////////////////////
+// Listar productos para API JSON
 ///////////////////////////////////////
 async function listProducts(req, res) {
   try {
-    let { limit = 10, page = 1, sort, query } = req.query;
-    limit = parseInt(limit);
-    page = parseInt(page);
-
-    const filter = {};
-    if (query) {
-      // Buscar por categoría (category) o por disponibilidad (status)
-      if (query.toLowerCase() === 'true' || query.toLowerCase() === 'false') {
-        filter.status = query.toLowerCase() === 'true';
-      } else {
-        filter.category = query; // asegurate que el campo correcto es 'category' según tu modelo
-      }
-    }
-
-    const sortOption = {};
-    if (sort === 'asc') sortOption.price = 1;
-    else if (sort === 'desc') sortOption.price = -1;
-
-    const totalDocs = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(totalDocs / limit);
-
-    const products = await Product.find(filter)
-      .sort(sortOption)
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    const hasPrevPage = page > 1;
-    const hasNextPage = page < totalPages;
-
-    const baseUrl = req.baseUrl + req.path;
-
-    // Construir links con query params para paginación
-    const queryString = [];
-    if (limit) queryString.push(`limit=${limit}`);
-    if (sort) queryString.push(`sort=${sort}`);
-    if (query) queryString.push(`query=${query}`);
-
-    const baseLink = `${baseUrl}?${queryString.join('&')}`;
-
-    const prevLink = hasPrevPage ? `${baseLink}&page=${page - 1}` : null;
-    const nextLink = hasNextPage ? `${baseLink}&page=${page + 1}` : null;
-
+    const data = await listProductsRender(req);
     res.json({
       status: 'success',
-      payload: products,
-      totalPages,
-      prevPage: hasPrevPage ? page - 1 : null,
-      nextPage: hasNextPage ? page + 1 : null,
-      page,
-      hasPrevPage,
-      hasNextPage,
-      prevLink,
-      nextLink
+      ...data
     });
   } catch (err) {
-    console.error(err);
+    console.error('Error listando productos:', err);
     res.status(500).json({ status: 'error', message: 'Error listando productos' });
   }
 }
@@ -76,7 +71,7 @@ async function showProduct(req, res) {
     if (!product) return res.status(404).json({ msj: 'Producto no encontrado' });
     res.json(product);
   } catch (err) {
-    console.error(err);
+    console.error('Error obteniendo producto:', err);
     res.status(500).json({ msj: 'Error obteniendo producto' });
   }
 }
@@ -105,7 +100,7 @@ async function addProducto(req, res) {
 
     res.status(201).json({ msj: 'Producto agregado', product: newProduct });
   } catch (err) {
-    console.error(err);
+    console.error('Error al guardar producto:', err);
     res.status(500).json({ msj: 'Error al guardar el producto' });
   }
 }
@@ -126,7 +121,7 @@ async function refreshProduct(req, res) {
 
     res.json({ msj: 'Producto actualizado con éxito', product: updatedProduct });
   } catch (err) {
-    console.error(err);
+    console.error('Error al actualizar producto:', err);
     res.status(500).json({ msj: 'Error al actualizar el producto' });
   }
 }
@@ -141,7 +136,7 @@ async function deletedProduct(req, res) {
     if (!deleted) return res.status(404).json({ msj: 'Producto no encontrado' });
     res.json({ msj: 'Producto eliminado con éxito', product: deleted });
   } catch (err) {
-    console.error(err);
+    console.error('Error al eliminar producto:', err);
     res.status(500).json({ msj: 'Error al eliminar el producto' });
   }
 }
@@ -166,19 +161,88 @@ async function changeStatusProduct(req, res) {
 
     res.json({ msj: `Status actualizado a ${status}`, product: updatedProduct });
   } catch (err) {
-    console.error(err);
+    console.error('Error al cambiar status producto:', err);
     res.status(500).json({ msj: 'Error al cambiar el status' });
+  }
+}
+
+///////////////////////////////////////
+// Funciones para WebSockets
+///////////////////////////////////////
+
+async function addProductFromSocket(productData) {
+  try {
+    const { title, stock, description, category, price, status } = productData;
+
+    if (!title || stock == null || !description || !category || price == null) {
+      throw new Error('Faltan campos obligatorios');
+    }
+
+    const newProduct = new Product({
+      title,
+      stock,
+      description,
+      category,
+      price,
+      status: status !== undefined ? status : true
+    });
+
+    await newProduct.save();
+    return newProduct;
+  } catch (err) {
+    console.error('Error al guardar producto vía socket:', err);
+    throw err;
+  }
+}
+
+async function updateProductFromSocket(updatedProduct) {
+  try {
+    const { id, ...updateData } = updatedProduct;
+    
+    if ('id' in updateData) delete updateData.id;
+
+    const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
+    
+    if (!product) {
+      throw new Error('Producto no encontrado');
+    }
+    
+    return product;
+  } catch (err) {
+    console.error('Error al actualizar producto vía socket:', err);
+    throw err;
+  }
+}
+
+async function deleteProductFromSocket(id) {
+  try {
+    const deleted = await Product.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      throw new Error('Producto no encontrado');
+    }
+    
+    return deleted;
+  } catch (err) {
+    console.error('Error al eliminar producto vía socket:', err);
+    throw err;
   }
 }
 
 ///////////////////////////////////////
 // Exportar funciones
 ///////////////////////////////////////
+
 module.exports = {
   listProducts,
+  listProductsRender, // exporta esta para usar en la vista
   showProduct,
   addProducto,
   refreshProduct,
   deletedProduct,
-  changeStatusProduct
+  changeStatusProduct,
+  // Funciones para WebSockets
+  addProductFromSocket,
+  updateProductFromSocket,
+  deleteProductFromSocket
 };

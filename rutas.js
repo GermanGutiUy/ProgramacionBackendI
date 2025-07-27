@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const router = express.Router();
 
 const controllersProducts = require('./controllers/controllersProducts');
@@ -8,46 +7,70 @@ const controllersCarts = require('./controllers/controllersCarts');
 /////////////////////////////////
 // Sección Views
 /////////////////////////////////
-router.get('/', controllersProducts.listProducts); // Vista paginada con productos
 
-router.get('/realtimeproducts', (req, res) => {
+// Renderizar listado de productos con paginación usando Handlebars
+router.get('/productos', async (req, res) => {
   try {
-    const data = fs.readFileSync('./datos/products.json', 'utf-8');
-    const products = JSON.parse(data);
-    res.render('realTimeProducts', { products });
-  } catch (err) {
-    console.error('Error leyendo products.json:', err);
-    res.render('realTimeProducts', { products: [] });
+    const data = await controllersProducts.listProductsRender(req);
+    res.render('home', data); // 'home' es el archivo .handlebars que compartiste
+  } catch (error) {
+    console.error('Error al renderizar productos:', error);
+    res.status(500).send('Error interno del servidor');
   }
 });
 
+// Vista de carritos
+router.get('/carts', (req, res) => {
+  res.render('products'); // Usamos products.handlebars para la gestión de carritos
+});
+
+// Vista de productos en tiempo real
+router.get('/realtime', (req, res) => {
+  res.render('realTimeProducts');
+});
+
+// Redirigir la raíz a /productos
+router.get('/', (req, res) => {
+  res.redirect('/productos');
+});
+
 /////////////////////////////////
-// Sección API
+// API Productos
 /////////////////////////////////
+
+// Listar productos en JSON
 router.get('/api/products', controllersProducts.listProducts);
 
-/////////////////////////////////
-// Sección Products
-/////////////////////////////////
-router.get('/products', controllersProducts.listProducts);
-router.get('/products/:id', controllersProducts.showProduct);
-router.post('/products', controllersProducts.addProducto);
-router.put('/products/:id', controllersProducts.refreshProduct);
-router.delete('/products/:id', controllersProducts.deletedProduct);
-router.patch('/products/:id/:status', controllersProducts.changeStatusProduct);
+// Agregar nuevo producto (POST)
+router.post('/api/products', controllersProducts.addProducto);
+
+// Obtener producto por ID (ejemplo)
+router.get('/api/products/:id', controllersProducts.showProduct);
+
+// Actualizar producto
+router.put('/api/products/:id', controllersProducts.refreshProduct);
+
+// Eliminar producto
+router.delete('/api/products/:id', controllersProducts.deletedProduct);
+
+// Cambiar status producto
+router.patch('/api/products/:id/status/:status', controllersProducts.changeStatusProduct);
 
 /////////////////////////////////
-// Sección Carts
+// API Carritos (ejemplo)
 /////////////////////////////////
-router.post('/carts', controllersCarts.createCart);
-router.post('/carts/:cid/product/:pid', controllersCarts.addProductCart);
-router.get('/carts/:cid', controllersCarts.obtainCartById);
-router.delete('/carts/:cid', controllersCarts.deletCart);
 
-// Nuevas rutas para carritos (paso 3)
+router.post('/api/carts', controllersCarts.createCart);
+router.post('/api/carts/:cid/products/:pid', controllersCarts.addProductCart);
+router.get('/api/carts/:cid', controllersCarts.obtainCartById);
+router.delete('/api/carts/:cid', controllersCarts.deletCart);
 router.delete('/api/carts/:cid/products/:pid', controllersCarts.deleteProductFromCart);
 router.put('/api/carts/:cid/products/:pid', controllersCarts.updateProductQuantity);
 router.put('/api/carts/:cid', controllersCarts.updateCartProducts);
-router.delete('/api/carts/:cid', controllersCarts.clearCart);
+router.delete('/api/carts/:cid/clear', controllersCarts.clearCart);
+
+/////////////////////////////////
+// Exportar router
+/////////////////////////////////
 
 module.exports = router;

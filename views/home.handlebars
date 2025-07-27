@@ -1,38 +1,459 @@
-<h1>Productos</h1>
+<div class="container-fluid p-4">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="mb-0">
+            <i class="fas fa-box text-primary me-2"></i>
+            Catálogo de Productos
+          </h1>
+          <p class="text-muted mb-0">Descubre nuestra amplia selección de productos</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="fas fa-plus me-1"></i>Nuevo Producto
+          </button>
+          <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createCartModal">
+            <i class="fas fa-shopping-cart me-1"></i>Crear Carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; margin-bottom: 20px;">
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Precio</th>
-      <th>Stock</th>
-      <th>Tipo</th>
-      <th>Disponible</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each payload}}
-      <tr>
-        <td>{{this.name}}</td>
-        <td>${{this.price}}</td>
-        <td>{{this.stock}}</td>
-        <td>{{this.type}}</td>
-        <td>{{#if this.status}}✅{{else}}❌{{/if}}</td>
-      </tr>
-    {{/each}}
-  </tbody>
-</table>
+  <!-- Filters Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form method="GET" action="/productos" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Categoría</label>
+              <select name="query" class="form-select">
+                <option value="">Todas las categorías</option>
+                <option value="electronics" {{#if (eq query "electronics")}}selected{{/if}}>Electrónicos</option>
+                <option value="clothing" {{#if (eq query "clothing")}}selected{{/if}}>Ropa</option>
+                <option value="books" {{#if (eq query "books")}}selected{{/if}}>Libros</option>
+                <option value="home" {{#if (eq query "home")}}selected{{/if}}>Hogar</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Ordenar por precio</label>
+              <select name="sort" class="form-select">
+                <option value="">Sin ordenar</option>
+                <option value="asc" {{#if (eq sort "asc")}}selected{{/if}}>Menor a mayor</option>
+                <option value="desc" {{#if (eq sort "desc")}}selected{{/if}}>Mayor a menor</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Productos por página</label>
+              <select name="limit" class="form-select">
+                <option value="5" {{#if (eq limit 5)}}selected{{/if}}>5</option>
+                <option value="10" {{#if (eq limit 10)}}selected{{/if}}>10</option>
+                <option value="20" {{#if (eq limit 20)}}selected{{/if}}>20</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter me-1"></i>Filtrar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div style="margin-bottom: 20px;">
-  Página {{page}} de {{totalPages}}
-</div>
+  <!-- Products Grid -->
+  <div class="row mb-4">
+    <div class="col-12">
+      {{#if payload.length}}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+          {{#each payload}}
+            <div class="col">
+              <div class="card product-card h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{this.title}}</h5>
+                    <span class="status-badge {{#if this.status}}status-available{{else}}status-unavailable{{/if}}">
+                      {{#if this.status}}Disponible{{else}}No disponible{{/if}}
+                    </span>
+                  </div>
+                  
+                  <p class="card-text text-muted mb-3">{{this.description}}</p>
+                  
+                  <div class="mb-3">
+                    <span class="price-tag">${{this.price}}</span>
+                    <span class="stock-info ms-2">
+                      <i class="fas fa-boxes me-1"></i>{{this.stock}} unidades
+                    </span>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <span class="badge bg-secondary">{{this.category}}</span>
+                  </div>
+                </div>
+                
+                <div class="card-footer">
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary flex-fill" 
+                            onclick="addToCart('{{this._id}}')">
+                      <i class="fas fa-cart-plus me-1"></i>Agregar
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" 
+                            onclick="editProduct('{{this._id}}')">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" 
+                            onclick="deleteProduct('{{this._id}}')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="text-center py-5">
+          <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+          <h4 class="text-muted">No se encontraron productos</h4>
+          <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
 
-<div>
-  {{#if hasPrevPage}}
-    <a href="/?page={{prevPage}}&limit=5">⬅ Anterior</a>
+  <!-- Pagination -->
+  {{#if totalPages}}
+    <div class="row">
+      <div class="col-12">
+        <nav aria-label="Navegación de páginas">
+          <ul class="pagination justify-content-center">
+            {{#if hasPrevPage}}
+              <li class="page-item">
+                <a class="page-link" href="/productos?page={{prevPage}}&limit={{limit}}&sort={{sort}}&query={{query}}">
+                  <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+              </li>
+            {{/if}}
+            
+            {{#each (range 1 totalPages)}}
+              <li class="page-item {{#if (eq this ../page)}}active{{/if}}">
+                <a class="page-link" href="/productos?page={{this}}&limit={{../limit}}&sort={{../sort}}&query={{../query}}">
+                  {{this}}
+                </a>
+              </li>
+            {{/each}}
+            
+            {{#if hasNextPage}}
+              <li class="page-item">
+                <a class="page-link" href="/productos?page={{nextPage}}&limit={{limit}}&sort={{sort}}&query={{query}}">
+                  Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            {{/if}}
+          </ul>
+        </nav>
+      </div>
+    </div>
   {{/if}}
 
-  {{#if hasNextPage}}
-    <a href="/?page={{nextPage}}&limit=5" style="margin-left: 10px;">Siguiente ➡</a>
-  {{/if}}
+  <!-- Info Section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <p class="mb-0">
+            <strong>Página {{page}}</strong> de <strong>{{totalPages}}</strong> | 
+            Mostrando <strong>{{payload.length}}</strong> productos
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-plus text-primary me-2"></i>
+          Agregar Nuevo Producto
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addProductForm">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nombre del producto</label>
+              <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Precio</label>
+              <input type="number" name="price" class="form-control" step="0.01" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Stock</label>
+              <input type="number" name="stock" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Categoría</label>
+              <select name="category" class="form-select" required>
+                <option value="">Seleccionar categoría</option>
+                <option value="electronics">Electrónicos</option>
+                <option value="clothing">Ropa</option>
+                <option value="books">Libros</option>
+                <option value="home">Hogar</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <textarea name="description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Estado</label>
+              <select name="status" class="form-select">
+                <option value="true">Disponible</option>
+                <option value="false">No disponible</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i>Guardar Producto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Create Cart Modal -->
+<div class="modal fade" id="createCartModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-shopping-cart text-success me-2"></i>
+          Crear Nuevo Carrito
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que quieres crear un nuevo carrito vacío?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="createCart()">
+          <i class="fas fa-plus me-1"></i>Crear Carrito
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add to Cart Modal -->
+<div class="modal fade" id="addToCartModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-cart-plus text-primary me-2"></i>
+          Agregar al Carrito
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addToCartForm">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">ID del Carrito</label>
+              <input type="text" name="cid" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">ID del Producto</label>
+              <input type="text" name="pid" class="form-control" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-cart-plus me-1"></i>Agregar al Carrito
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Add Product Form Handler
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const productData = Object.fromEntries(formData.entries());
+  
+  try {
+    const response = await fetch('/api/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData)
+    });
+    
+    if (response.ok) {
+      showNotification('Producto agregado exitosamente', 'success');
+      e.target.reset();
+      
+      // Cerrar modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      // Recargar página después de un breve delay
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      const error = await response.json();
+      showNotification('Error: ' + error.msj, 'danger');
+    }
+  } catch (error) {
+    console.error('Error al agregar producto:', error);
+    showNotification('Error al agregar producto', 'danger');
+  }
+});
+
+// Create Cart Function
+async function createCart() {
+  try {
+    const response = await fetch('/api/carts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      showNotification(`Carrito creado con ID: ${result.cart._id}`, 'success');
+      
+      // Cerrar modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('createCartModal'));
+      if (modal) {
+        modal.hide();
+      }
+    } else {
+      const error = await response.json();
+      showNotification('Error: ' + error.msj, 'danger');
+    }
+  } catch (error) {
+    console.error('Error al crear carrito:', error);
+    showNotification('Error al crear carrito', 'danger');
+  }
+}
+
+// Add to Cart Function
+function addToCart(productId) {
+  document.querySelector('#addToCartForm input[name="pid"]').value = productId;
+  
+  // Mostrar modal
+  const modal = new bootstrap.Modal(document.getElementById('addToCartModal'));
+  modal.show();
+}
+
+document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const cid = formData.get('cid');
+  const pid = formData.get('pid');
+  
+  try {
+    const response = await fetch(`/api/carts/${cid}/products/${pid}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (response.ok) {
+      showNotification('Producto agregado al carrito exitosamente', 'success');
+      
+      // Cerrar modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addToCartModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      e.target.reset();
+    } else {
+      const error = await response.json();
+      showNotification('Error: ' + error.msj, 'danger');
+    }
+  } catch (error) {
+    console.error('Error al agregar al carrito:', error);
+    showNotification('Error al agregar al carrito', 'danger');
+  }
+});
+
+// Delete Product Function
+async function deleteProduct(productId) {
+  if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        showNotification('Producto eliminado exitosamente', 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      } else {
+        const error = await response.json();
+        showNotification('Error: ' + error.msj, 'danger');
+      }
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      showNotification('Error al eliminar producto', 'danger');
+    }
+  }
+}
+
+// Edit Product Function
+function editProduct(productId) {
+  showNotification('Función de edición en desarrollo', 'info');
+}
+
+// Inicialización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🟢 Formularios de productos inicializados');
+  
+  // Asegurar que todos los inputs sean interactivos
+  const inputs = document.querySelectorAll('input, textarea, select');
+  inputs.forEach(input => {
+    input.style.pointerEvents = 'auto';
+    input.style.userSelect = 'text';
+    input.style.webkitUserSelect = 'text';
+    input.style.mozUserSelect = 'text';
+    input.style.msUserSelect = 'text';
+  });
+  
+  // Asegurar que todos los botones sean clickeables
+  const buttons = document.querySelectorAll('.btn');
+  buttons.forEach(button => {
+    button.style.pointerEvents = 'auto';
+    button.style.cursor = 'pointer';
+  });
+});
+</script>
