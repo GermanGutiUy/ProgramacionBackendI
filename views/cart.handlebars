@@ -1,0 +1,291 @@
+<div class="container-fluid p-4">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="mb-0">
+            <i class="fas fa-shopping-cart text-primary me-2"></i>
+            Carrito #{{cartId}}
+          </h1>
+          <p class="text-muted mb-0">Gestiona los productos de tu carrito</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/productos" class="btn btn-outline-primary">
+            <i class="fas fa-plus me-1"></i>Agregar Productos
+          </a>
+          <a href="/carts" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Content -->
+  <div class="row">
+    <div class="col-12">
+      {{#if cart.products.length}}
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-list me-2"></i>
+              Productos en el Carrito ({{cart.products.length}})
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each cart.products}}
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="me-3">
+                            <i class="fas fa-box fa-2x text-primary"></i>
+                          </div>
+                          <div>
+                            <h6 class="mb-0">{{this.product.title}}</h6>
+                            <small class="text-muted">{{this.product.category}}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="price-tag">${{this.product.price}}</span>
+                      </td>
+                      <td>
+                        <div class="input-group" style="width: 120px;">
+                          <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', {{this.quantity}}, -1)">
+                            <i class="fas fa-minus"></i>
+                          </button>
+                          <input type="number" class="form-control form-control-sm text-center" value="{{this.quantity}}" min="1" onchange="updateQuantity('{{../cartId}}', '{{this.product._id}}', this.value, 0)">
+                          <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', {{this.quantity}}, 1)">
+                            <i class="fas fa-plus"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <strong>${{multiply this.product.price this.quantity}}</strong>
+                      </td>
+                      <td>
+                        <button class="btn btn-outline-danger btn-sm" onclick="removeProduct('{{../cartId}}', '{{this.product._id}}')">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h5 class="mb-0">Total: <span class="text-primary">${{total}}</span></h5>
+              </div>
+              <div class="col-md-6 text-end">
+                <button class="btn btn-outline-warning me-2" onclick="clearCart('{{cartId}}')">
+                  <i class="fas fa-trash me-1"></i>Vaciar Carrito
+                </button>
+                <button class="btn btn-success" onclick="checkout()">
+                  <i class="fas fa-credit-card me-1"></i>Finalizar Compra
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        <div class="text-center py-5">
+          <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+          <h4 class="text-muted">Carrito Vacío</h4>
+          <p class="text-muted">No hay productos en tu carrito</p>
+          <a href="/productos" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Agregar Productos
+          </a>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Cart Actions -->
+  {{#if cart.products.length}}
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="fas fa-cog me-2"></i>
+              Acciones del Carrito
+            </h5>
+            <div class="row">
+              <div class="col-md-3">
+                <button class="btn btn-outline-info w-100" onclick="exportCart()">
+                  <i class="fas fa-download me-1"></i>Exportar
+                </button>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-outline-secondary w-100" onclick="shareCart()">
+                  <i class="fas fa-share me-1"></i>Compartir
+                </button>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-outline-warning w-100" onclick="clearCart('{{cartId}}')">
+                  <i class="fas fa-trash me-1"></i>Vaciar
+                </button>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-outline-danger w-100" onclick="deleteCart('{{cartId}}')">
+                  <i class="fas fa-times me-1"></i>Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>
+
+<script>
+// Update Product Quantity
+async function updateQuantity(cartId, productId, quantity, change) {
+  let newQuantity = parseInt(quantity);
+  
+  if (change !== 0) {
+    newQuantity = newQuantity + change;
+  }
+  
+  if (newQuantity < 1) {
+    newQuantity = 1;
+  }
+  
+  try {
+    const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ quantity: newQuantity })
+    });
+    
+    if (response.ok) {
+      showNotification('Cantidad actualizada', 'success');
+      setTimeout(() => {
+        location.reload();
+      }, 500);
+    } else {
+      const error = await response.json();
+      showNotification('Error: ' + error.msj, 'danger');
+    }
+  } catch (error) {
+    console.error('Error al actualizar cantidad:', error);
+    showNotification('Error al actualizar cantidad', 'danger');
+  }
+}
+
+// Remove Product from Cart
+async function removeProduct(cartId, productId) {
+  if (confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        showNotification('Producto eliminado del carrito', 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      } else {
+        const error = await response.json();
+        showNotification('Error: ' + error.msj, 'danger');
+      }
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      showNotification('Error al eliminar producto', 'danger');
+    }
+  }
+}
+
+// Clear Cart
+async function clearCart(cartId) {
+  if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/clear`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        showNotification('Carrito vaciado', 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      } else {
+        const error = await response.json();
+        showNotification('Error: ' + error.msj, 'danger');
+      }
+    } catch (error) {
+      console.error('Error al vaciar carrito:', error);
+      showNotification('Error al vaciar carrito', 'danger');
+    }
+  }
+}
+
+// Delete Cart
+async function deleteCart(cartId) {
+  if (confirm('¿Estás seguro de que quieres eliminar el carrito completo?')) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        showNotification('Carrito eliminado', 'success');
+        setTimeout(() => {
+          window.location.href = '/carts';
+        }, 500);
+      } else {
+        const error = await response.json();
+        showNotification('Error: ' + error.msj, 'danger');
+      }
+    } catch (error) {
+      console.error('Error al eliminar carrito:', error);
+      showNotification('Error al eliminar carrito', 'danger');
+    }
+  }
+}
+
+// Checkout Function
+function checkout() {
+  showNotification('Función de checkout en desarrollo', 'info');
+}
+
+// Export Cart
+function exportCart() {
+  showNotification('Función de exportación en desarrollo', 'info');
+}
+
+// Share Cart
+function shareCart() {
+  const cartUrl = window.location.href;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Mi Carrito',
+      text: 'Revisa los productos en mi carrito',
+      url: cartUrl
+    });
+  } else {
+    navigator.clipboard.writeText(cartUrl);
+    showNotification('Enlace del carrito copiado al portapapeles', 'success');
+  }
+}
+</script> 

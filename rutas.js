@@ -24,6 +24,30 @@ router.get('/carts', (req, res) => {
   res.render('products'); // Usamos products.handlebars para la gestión de carritos
 });
 
+// Vista de carrito específico
+router.get('/carts/:cid', async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const cart = await controllersCarts.obtainCartByIdRender(cid);
+    res.render('cart', cart);
+  } catch (error) {
+    console.error('Error al renderizar carrito:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Vista de producto específico
+router.get('/products/:pid', async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const product = await controllersProducts.showProductRender(pid);
+    res.render('productDetail', product);
+  } catch (error) {
+    console.error('Error al renderizar producto:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
 // Vista de productos en tiempo real
 router.get('/realtime', (req, res) => {
   res.render('realTimeProducts');

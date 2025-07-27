@@ -34,6 +34,16 @@ async function listProductsRender(req) {
   const hasPrevPage = page > 1;
   const hasNextPage = page < totalPages;
 
+  // Construir enlaces de paginación
+  const buildLink = (pageNum) => {
+    const params = new URLSearchParams();
+    if (limit !== 10) params.append('limit', limit);
+    if (pageNum !== 1) params.append('page', pageNum);
+    if (sort) params.append('sort', sort);
+    if (query) params.append('query', query);
+    return params.toString() ? `?${params.toString()}` : '';
+  };
+
   return {
     payload: products,
     totalPages,
@@ -41,7 +51,12 @@ async function listProductsRender(req) {
     nextPage: hasNextPage ? page + 1 : null,
     page,
     hasPrevPage,
-    hasNextPage
+    hasNextPage,
+    prevLink: hasPrevPage ? buildLink(page - 1) : null,
+    nextLink: hasNextPage ? buildLink(page + 1) : null,
+    limit,
+    sort,
+    query
   };
 }
 
@@ -58,6 +73,22 @@ async function listProducts(req, res) {
   } catch (err) {
     console.error('Error listando productos:', err);
     res.status(500).json({ status: 'error', message: 'Error listando productos' });
+  }
+}
+
+///////////////////////////////////////
+// Obtener producto por ID para renderizado
+///////////////////////////////////////
+async function showProductRender(pid) {
+  try {
+    const product = await Product.findById(pid).lean();
+    if (!product) {
+      throw new Error('Producto no encontrado');
+    }
+    return { product };
+  } catch (err) {
+    console.error('Error obteniendo producto para renderizado:', err);
+    throw err;
   }
 }
 
@@ -237,6 +268,7 @@ module.exports = {
   listProducts,
   listProductsRender, // exporta esta para usar en la vista
   showProduct,
+  showProductRender, // exporta esta para renderizado
   addProducto,
   refreshProduct,
   deletedProduct,

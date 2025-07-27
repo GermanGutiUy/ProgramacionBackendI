@@ -21,6 +21,7 @@ async function createCart(req, res) {
 async function addProductCart(req, res) {
   try {
     const { cid, pid } = req.params;
+    const { quantity = 1 } = req.body;
 
     // Verificar que exista el producto
     const product = await Product.findById(pid);
@@ -32,9 +33,9 @@ async function addProductCart(req, res) {
     const prodInCart = cart.products.find(p => p.product.toString() === pid);
 
     if (prodInCart) {
-      prodInCart.quantity += 1;
+      prodInCart.quantity += parseInt(quantity);
     } else {
-      cart.products.push({ product: pid, quantity: 1 });
+      cart.products.push({ product: pid, quantity: parseInt(quantity) });
     }
 
     await cart.save();
@@ -42,6 +43,33 @@ async function addProductCart(req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).json({ msj: 'Error al agregar producto al carrito' });
+  }
+}
+
+///////////////////////////////////////
+// Obtener carrito por id para renderizado
+///////////////////////////////////////
+async function obtainCartByIdRender(cid) {
+  try {
+    const cart = await Cart.findById(cid).populate('products.product');
+    if (!cart) {
+      throw new Error('Carrito no encontrado');
+    }
+    
+    // Calcular totales
+    let total = 0;
+    cart.products.forEach(item => {
+      total += item.product.price * item.quantity;
+    });
+    
+    return { 
+      cart: cart.toObject(), 
+      total: total.toFixed(2),
+      cartId: cid
+    };
+  } catch (err) {
+    console.error('Error obteniendo carrito para renderizado:', err);
+    throw err;
   }
 }
 
@@ -196,5 +224,6 @@ module.exports = {
   deleteProductFromCart,
   updateProductQuantity,
   updateCartProducts,
-  clearCart
+  clearCart,
+  obtainCartByIdRender
 };

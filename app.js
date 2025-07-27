@@ -57,6 +57,9 @@ const handlebars = exphbs.create({
     truncate: function(str, length) {
       if (str.length <= length) return str;
       return str.substring(0, length) + '...';
+    },
+    multiply: function(a, b) {
+      return (a * b).toFixed(2);
     }
   }
 });
